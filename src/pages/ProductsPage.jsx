@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import { BudgetContext } from "../context/BudgetContext";
 
 function ProductsPage() {
 
   const [products, setProducts] = useState([]);
 
+  // leggiamo budgetMode dal context
+  const { budgetMode } = useContext(BudgetContext);
+
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Prodotti ricevuti:", data);
         setProducts(data);
       })
       .catch((error) => {
@@ -17,12 +20,16 @@ function ProductsPage() {
       });
   }, []);
 
+  // se budgetMode è true mostriamo solo i prodotti con price <= 30
+  const filteredProducts = budgetMode
+    ? products.filter((product) => product.price <= 30)
+    : products;
+
   return (
     <div>
       <h1>Prodotti</h1>
       <div>
-        {products.map((product) => (
-          // Link che porta alla pagina di dettaglio con l'id del prodotto
+        {filteredProducts.map((product) => (
           <Link to={`/products/${product.id}`} key={product.id}>
             <div>
               <img src={product.image} alt={product.title} />
@@ -35,7 +42,5 @@ function ProductsPage() {
     </div>
   );
 }
-
-
 
 export default ProductsPage;
